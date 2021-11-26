@@ -18,7 +18,6 @@ fn main() {
 ```
 
 ### Todo
-- [ ] CCV Generation
 - [ ] Optimization of Algorithm
 - [ ] Expiration Date Generation
 - [ ] 0.. syntax for infinite looop (Possible)
@@ -34,3 +33,4 @@ fn main() {
   - [x] Mastercard
   - [x] Discovery
   - [x] American Express
+- [x] CCV Generation

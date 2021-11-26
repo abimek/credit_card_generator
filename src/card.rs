@@ -9,7 +9,7 @@ pub enum CardType {
     Master,
     AmericanExpress(AmericanExpressCard),
     Discover,
-    Custom(i64),
+    Custom(i64, i64),
 }
 
 #[derive(Clone)]
@@ -37,8 +37,11 @@ impl CardType {
                 Ok(CardType::Discover)
             }
             _ => {
-                if v.parse::<i64>().is_ok() {
-                    Ok(CardType::Custom(v.parse::<i64>().unwrap()))
+                let mut v2 = v.split(':');
+                let first = v2.next().unwrap();
+                let second = v2.next().unwrap();
+                if first.parse::<i64>().is_ok() && second.parse::<i64>().is_ok() {
+                    Ok(CardType::Custom(first.parse::<i64>().unwrap(), second.parse::<i64>().unwrap()))
                 } else {
                     Err("Invalid Card Type".to_string())
                 }
@@ -49,7 +52,7 @@ impl CardType {
     fn int_val(&self) -> i64 {
         match self {
             CardType::Visa => 4,
-            CardType::Master => 5,
+            CardType::Master => 51,
             CardType::AmericanExpress(am) => {
                 match am {
                     AmericanExpressCard::T4 => 34,
@@ -57,17 +60,17 @@ impl CardType {
                 }
             }
             CardType::Discover => 6,
-            CardType::Custom(v) => v.clone()
+            CardType::Custom(v, _) => v.clone()
         }
     }
 }
 
 pub struct Card {
+    ccv: Option<i64>,
     number: Option<i64>,
     length: i64,
     ctype: CardType,
 }
-
 
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -82,19 +85,27 @@ impl fmt::Display for Card {
                 }
             }
             CardType::Discover => type_name = String::from("discover"),
-            CardType::Custom(i) => type_name = format!("custom({})", i)
+            CardType::Custom(i, i2) => type_name = format!("custom({}, ccv_length({}))", i, i2)
         }
         if let Some(i) = self.number {
-            write!(f, "type: {}, number: {}", type_name, i)
+            if let Some(c) = self.ccv {
+                write!(f, "type: {}, number: {}, ccv: {}", type_name, i, c)
+            }else{
+                write!(f, "type: {}, number: {}, ccv: None", type_name, i)
+            }
         } else {
-            write!(f, "type: {}, number: {}", type_name, "None_Generated")
+            if let Some(c) = self.ccv {
+                write!(f, "type: {}, number: {}, ccv: {}", type_name, "None Generated", c)
+            }else{
+                write!(f, "type: {}, number: {}, ccv: {}", type_name, "None_Generated", "None_Generated")
+            }
         }
     }
 }
 
 impl Card {
     pub fn from(length: i64, card: CardType) -> Card {
-        Card { length, ctype: card, number: None }
+        Card {ccv: None, length, ctype: card, number: None }
     }
 
     pub fn is_valid(&self) -> Result<bool, String> {
@@ -135,6 +146,21 @@ impl Card {
         return Ok(new_num % 10 == 0);
     }
 
+
+    pub fn generate_ccv(&mut self, rng: &mut ThreadRng){
+        match &self.ctype {
+            CardType::Visa | CardType::Master | CardType::Discover => self.ccv = Some(rng.gen_range(100..1000)),
+            CardType::AmericanExpress(i) => self.ccv = Some(rng.gen_range(1000..10000)),
+            CardType::Custom(_, i) => {
+                let mut max: i64 = 10;
+                let t = i.clone();
+                for _ in 0..t-1{
+                    max *= 10;
+                }
+                self.ccv = Some(rng.gen_range(max/10..max));
+            }
+        }
+    }
 
     pub fn generate_number(&mut self, rng: &mut ThreadRng) {
         let mut t = self.ctype.clone().int_val();

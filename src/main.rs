@@ -23,11 +23,9 @@ struct Arguments {
 }
 
 fn main() {
-   // let args = Arguments::parse();
-    let mut gen = generator::CardGenerator::new(generator::Config::default().set_length(13));
+    let args = Arguments::parse();
+    let mut gen = generator::CardGenerator::new(generator::Config::default().set_length(args.length).set_card_type(card::CardType::from_string(&args.ctype).unwrap()));
     for (i, el) in gen.enumerate() {
         println!("card {}: {}", i, el);
     }
-  //  gen.generate_type(card::CardType::from_string(&args.ctype).unwrap(), args.amount, args.length);
-   // gen.output(generator::GeneratorOutput::STD);
 }

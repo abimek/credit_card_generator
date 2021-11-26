@@ -45,6 +45,7 @@ impl Iterator for CardGenerator
     fn next(&mut self) -> Option<Self::Item> {
         let mut card = card::Card::from(self.config.length.clone(), self.config.ctype.clone());
         card.generate_number(&mut self.rng);
+        card.generate_ccv(&mut self.rng);
         Some(card)
     }
 }
@@ -67,7 +68,7 @@ impl CardGenerator {
         match output {
             GeneratorOutput::STD => {
                 for (i, card) in self.cards.iter().enumerate() {
-                    println!("card {}: {}", i, card);
+                    println!("card {}: ({})", i, card);
                 }
             },
             GeneratorOutput::FILE(location) => {
