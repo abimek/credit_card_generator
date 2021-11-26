@@ -1,43 +1,58 @@
 use rand::rngs::ThreadRng;
 use crate::card;
+use std::default;
+use crate::card::CardType;
+
 
 pub enum GeneratorOutput {
     STD,
     FILE(String)
 }
 
-pub trait Argumentative {}
-
-pub struct None;
-impl Argumentative for None{}
-
-pub struct DefaultOptions {
-    pub(crate) ctype: card::CardType,
-    pub(crate) length: i64
+pub struct Config {
+    ctype: card::CardType,
+    length: i64
 }
-impl Argumentative for DefaultOptions{}
 
-pub struct CardGenerator<Argument> {
+impl default::Default for Config{
+    fn default() -> Self {
+        Config{ ctype: CardType::Visa, length: 15}
+    }
+}
+
+impl Config {
+    pub fn set_card_type(mut self, ctype: card::CardType) -> Self {
+        self.ctype = ctype;
+        self
+    }
+
+    pub fn set_length(mut self, length: i64) -> Self {
+        self.length = length;
+        self
+    }
+}
+
+pub struct CardGenerator {
     cards: Vec<card::Card>,
     rng: ThreadRng,
-    args: Argument
+    config: Config
 }
 
-impl Iterator for CardGenerator<DefaultOptions>
+impl Iterator for CardGenerator
 {
     type Item = card::Card;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut card = card::Card::from(self.args.length.clone(), self.args.ctype.clone());
+        let mut card = card::Card::from(self.config.length.clone(), self.config.ctype.clone());
         card.generate_number(&mut self.rng);
         Some(card)
     }
 }
 
-impl<Argument: Argumentative> CardGenerator<Argument> {
-    pub fn new(t: Argument) -> CardGenerator<Argument> {
+impl CardGenerator {
+    pub fn new(config: Config) -> CardGenerator {
         let cards: Vec<card::Card> = Vec::new();
-        CardGenerator{cards, rng: rand::thread_rng(), args: t}
+        CardGenerator{cards, rng: rand::thread_rng(), config}
     }
 
     pub fn generate_type(&mut self, ctype: card::CardType, amount: i64, length: i64) {

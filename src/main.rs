@@ -1,5 +1,6 @@
 use clap::Parser;
 use crate::card::CardType;
+use crate::generator::Config;
 
 pub mod generator;
 pub mod card;
@@ -23,7 +24,7 @@ struct Arguments {
 
 fn main() {
    // let args = Arguments::parse();
-    let mut gen = generator::CardGenerator::new(generator::DefaultOptions{ctype: CardType::Visa, length: 16});
+    let mut gen = generator::CardGenerator::new(generator::Config::default().set_length(13));
     for (i, el) in gen.enumerate() {
         println!("card {}: {}", i, el);
     }
