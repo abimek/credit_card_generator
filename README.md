@@ -22,6 +22,8 @@ fn main() {
 - [ ] Optimization of Algorithm
 - [ ] Expiration Date Generation
 - [ ] 0.. syntax for infinite looop (Possible)
+- [ ] File Output
+- [ ] Default Values for length of each type of card (since their is a length limit)(MAYBE)
 
 
 ### Done
