@@ -24,7 +24,7 @@ struct Arguments {
 
 fn main() {
     let args = Arguments::parse();
-    let mut gen = generator::CardGenerator::new(generator::Config::default().set_length(args.length).set_card_type(card::CardType::from_string(&args.ctype).unwrap()));
+    let mut gen = generator::CardGenerator::new(generator::Config::default().set_card_type(card::CardType::Visa(8)));
     for (i, el) in gen.enumerate() {
         println!("card {}: {}", i, el);
     }

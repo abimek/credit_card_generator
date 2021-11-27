@@ -5,11 +5,11 @@ use std::fmt::Formatter;
 
 #[derive(Clone)]
 pub enum CardType {
-    Visa,
+    Visa(i64),
     Master,
     AmericanExpress(AmericanExpressCard),
     Discover,
-    Custom(i64, i64),
+    Custom(i64, i64, i64),
 }
 
 #[derive(Clone)]
@@ -22,7 +22,7 @@ impl CardType {
     pub fn from_string(v: &String) -> Result<CardType, String> {
         match v.to_lowercase().as_ref() {
             "visa" | "v" => {
-                Ok(CardType::Visa)
+                Ok(CardType::Visa(16))
             }
             "master" | "m" => {
                 Ok(CardType::Master)
@@ -41,7 +41,7 @@ impl CardType {
                 let first = v2.next().unwrap();
                 let second = v2.next().unwrap();
                 if first.parse::<i64>().is_ok() && second.parse::<i64>().is_ok() {
-                    Ok(CardType::Custom(first.parse::<i64>().unwrap(), second.parse::<i64>().unwrap()))
+                    Ok(CardType::Custom(first.parse::<i64>().unwrap(), second.parse::<i64>().unwrap(), 16))
                 } else {
                     Err("Invalid Card Type".to_string())
                 }
@@ -51,7 +51,7 @@ impl CardType {
 
     fn int_val(&self) -> i64 {
         match self {
-            CardType::Visa => 4,
+            CardType::Visa(_) => 4,
             CardType::Master => 51,
             CardType::AmericanExpress(am) => {
                 match am {
@@ -60,7 +60,16 @@ impl CardType {
                 }
             }
             CardType::Discover => 6,
-            CardType::Custom(v, _) => v.clone()
+            CardType::Custom(v, _, _) => v.clone()
+        }
+    }
+
+    fn get_number_length(&self) -> i64 {
+        match self {
+            CardType::Master | CardType::Discover => 16,
+            CardType::AmericanExpress(_) => 15,
+            CardType::Visa(length) => length.clone(),
+            CardType::Custom(_, _, length) => length.clone()
         }
     }
 }
@@ -68,7 +77,6 @@ impl CardType {
 pub struct Card {
     ccv: Option<i64>,
     number: Option<i64>,
-    length: i64,
     ctype: CardType,
 }
 
@@ -76,7 +84,7 @@ impl fmt::Display for Card {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut type_name = String::new();
         match self.ctype.clone() {
-            CardType::Visa => type_name = String::from("Visa"),
+            CardType::Visa(_) => type_name = String::from("Visa"),
             CardType::Master => type_name = String::from("Master"),
             CardType::AmericanExpress(t) => {
                 match t {
@@ -85,7 +93,7 @@ impl fmt::Display for Card {
                 }
             }
             CardType::Discover => type_name = String::from("discover"),
-            CardType::Custom(i, i2) => type_name = format!("custom({}, ccv_length({}))", i, i2)
+            CardType::Custom(i, i2, _) => type_name = format!("custom({}, ccv_length({}))", i, i2)
         }
         if let Some(i) = self.number {
             if let Some(c) = self.ccv {
@@ -104,8 +112,8 @@ impl fmt::Display for Card {
 }
 
 impl Card {
-    pub fn from(length: i64, card: CardType) -> Card {
-        Card {ccv: None, length, ctype: card, number: None }
+    pub fn from(card: CardType) -> Card {
+        Card {ccv: None, ctype: card, number: None }
     }
 
     pub fn is_valid(&self) -> Result<bool, String> {
@@ -149,9 +157,9 @@ impl Card {
 
     pub fn generate_ccv(&mut self, rng: &mut ThreadRng){
         match &self.ctype {
-            CardType::Visa | CardType::Master | CardType::Discover => self.ccv = Some(rng.gen_range(100..1000)),
+            CardType::Visa(_) | CardType::Master | CardType::Discover => self.ccv = Some(rng.gen_range(100..1000)),
             CardType::AmericanExpress(i) => self.ccv = Some(rng.gen_range(1000..10000)),
-            CardType::Custom(_, i) => {
+            CardType::Custom(_, i, _) => {
                 let mut max: i64 = 10;
                 let t = i.clone();
                 for _ in 0..t-1{
@@ -164,7 +172,7 @@ impl Card {
 
     pub fn generate_number(&mut self, rng: &mut ThreadRng) {
         let mut t = self.ctype.clone().int_val();
-        let glength = self.length - numlength(self.ctype.clone().int_val());
+        let glength = self.ctype.get_number_length() - numlength(self.ctype.clone().int_val());
         let mut beg = 1;
         for _ in 0..glength - 1 {
             beg *= 10;
