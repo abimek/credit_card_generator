@@ -116,6 +116,14 @@ impl Card {
         Card {ccv: None, ctype: card, number: None }
     }
 
+    pub fn get_number(&self) -> Option<i64> {
+        self.number
+    }
+
+    pub fn get_ccv(&self) -> Option<i64> {
+        self.ccv
+    }
+
     pub fn is_valid(&self) -> Result<bool, String> {
         let mut num: i64 = 0;
         if let Some(i) = self.number {
