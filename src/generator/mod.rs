@@ -70,4 +70,8 @@ impl CardGenerator {
             }
         }
     }
+
+    pub fn get_cards(&self) -> &[card::Card] {
+        return &self.cards
+    }
 }

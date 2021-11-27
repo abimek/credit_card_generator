@@ -211,3 +211,13 @@ fn numlength(n: i64) -> i64 {
     }
     return l;
 }
+
+#[cfg(tests)]
+mod tests {
+    use crate::card::numlength;
+
+    #[test]
+    fn num_length_test() {
+        assert_eq!(numlength(20000), 5);
+    }
+}
