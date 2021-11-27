@@ -1,5 +1,5 @@
 [package]
-name = "cardit_card_generator"
+name = "credit_card_generator"
 version = "0.1.0"
 edition = "2021"
 

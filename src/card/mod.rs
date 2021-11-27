@@ -158,7 +158,7 @@ impl Card {
     pub fn generate_ccv(&mut self, rng: &mut ThreadRng){
         match &self.ctype {
             CardType::Visa(_) | CardType::Master | CardType::Discover => self.ccv = Some(rng.gen_range(100..1000)),
-            CardType::AmericanExpress(i) => self.ccv = Some(rng.gen_range(1000..10000)),
+            CardType::AmericanExpress(_) => self.ccv = Some(rng.gen_range(1000..10000)),
             CardType::Custom(_, i, _) => {
                 let mut max: i64 = 10;
                 let t = i.clone();
