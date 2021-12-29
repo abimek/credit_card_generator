@@ -1,9 +1,8 @@
 #[cfg(test)]
 pub mod tests{
-
+    use std::io::{BufRead, BufReader};
     use assert_matches::assert_matches;
 
-    use std::ops::Deref;
     use crate::*;
     use assert_impl::assert_impl;
 
@@ -39,6 +38,18 @@ pub mod tests{
         gen.generate_type(crate::card::CardType::Master, 64);
         for card in gen.get_cards() {
             assert_matches!(card.is_valid(), Ok(true))
+        }
+    }
+
+    #[test]
+    fn file_output(){
+        let mut gen = crate::generator::CardGenerator::new(crate::generator::Config::default());
+        gen.generate_type(crate::card::CardType::Master, 64);
+        gen.output(crate::generator::GeneratorOutput::FILE(String::from("test.txt")));
+        let mut f = std::fs::File::open("test.txt").unwrap();
+        let mut fi = BufReader::new(f);
+        for line in fi.lines() {
+            println!("{}", line.unwrap());
         }
     }
 }

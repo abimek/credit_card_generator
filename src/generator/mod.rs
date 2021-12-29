@@ -2,7 +2,9 @@ use rand::rngs::ThreadRng;
 use crate::card;
 use std::default;
 use crate::card::CardType;
-
+use std::fs;
+use std::io::Write;
+use std::env;
 
 pub enum GeneratorOutput {
     STD,
@@ -65,8 +67,12 @@ impl CardGenerator {
                     println!("card {}: ({})", i, card);
                 }
             },
-            GeneratorOutput::FILE(location) => {
-                //TODO IMPLEMENT
+            GeneratorOutput::FILE(name) => {
+                let mut f = fs::File::create(name.clone());
+                for (i, card) in self.cards.iter().enumerate() {
+                    fs::write(name.clone(), format!("card {}: ({})", i, card));
+                  //  println!("card {}: ({})", i, card);
+                }
             }
         }
     }
