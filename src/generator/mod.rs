@@ -5,6 +5,7 @@ use crate::card::CardType;
 use std::fs;
 use std::io::Write;
 use std::env;
+use std::fs::OpenOptions;
 
 pub enum GeneratorOutput {
     STD,
@@ -68,10 +69,17 @@ impl CardGenerator {
                 }
             },
             GeneratorOutput::FILE(name) => {
-                let mut f = fs::File::create(name.clone());
+              //  let mut f = fs::File::create(name.clone());
+                let mut file = OpenOptions::new()
+                    .write(true)
+                    .append(true)
+                    .open(name.clone())
+                    .unwrap();
                 for (i, card) in self.cards.iter().enumerate() {
-                    fs::write(name.clone(), format!("card {}: ({})", i, card));
-                  //  println!("card {}: ({})", i, card);
+                    if let Err(e) = writeln!(file, "{}", format!("card {}: ({})", i, card)) {
+                        //todo through a proper error
+                        eprintln!("Couldn't write to file: {}", e);
+                    }
                 }
             }
         }
