@@ -1,9 +1,7 @@
 # credit_card_validator
-**A brute-force implementation luhn's algorithm implemented in rust made for generating credit card numbers that and ccv's**
+**A brute-force implementation of luhn's algorithm implemented in rust made for generating credit card numbers and ccv's**
 
 At the current state of this project most of the major features such as ccv, expiration date, and random name generation(not sure if I'm going to include this) are not implemented
-
-Also, the project is currently not a library and will be converted to one once most of the major features are finished
 
 ### Usage
 
